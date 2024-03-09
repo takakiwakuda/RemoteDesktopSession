@@ -113,30 +113,26 @@ public class RDConnectionClient
 
     private unsafe byte[] GetIPv4Address()
     {
-        ushort[] buffer = new ushort[_clientInfo.ClientAddress.Length];
-        WriteClientAddress(buffer);
-
+        var clientAddress = _clientInfo.ClientAddress;
         byte[] address = new byte[IPv4AddressLength];
 
         for (int i = 0; i < address.Length; i++)
         {
-            address[i] = (byte)buffer[i];
+            address[i] = (byte)clientAddress[i];
         }
 
         return address;
     }
 
-    private byte[] GetIPv6Address()
+    private unsafe byte[] GetIPv6Address()
     {
-        ushort[] buffer = new ushort[_clientInfo.ClientAddress.Length];
-        WriteClientAddress(buffer);
-
+        var clientAddress = _clientInfo.ClientAddress;
         byte[] address = new byte[IPv6AddressLength];
         ushort number;
 
         for (int i = 0; i < address.Length / 2; i++)
         {
-            number = buffer[i];
+            number = clientAddress[i];
             address[i * 2] = (byte)(number >> 8);
             address[i * 2 + 1] = (byte)number;
         }
@@ -152,16 +148,6 @@ public class RDConnectionClient
             AddressFamily.InterNetworkV6 => GetIPv6Address(),
             _ => [],
         };
-    }
-
-    private unsafe void WriteClientAddress(ushort[] buffer)
-    {
-        var clientAddress = _clientInfo.ClientAddress;
-
-        fixed (ushort* ptr = buffer)
-        {
-            Buffer.MemoryCopy(clientAddress.Value, ptr, buffer.Length, clientAddress.Length);
-        }
     }
 
     private unsafe string? GetClientDirectoryName()
