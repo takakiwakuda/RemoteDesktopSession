@@ -17,10 +17,6 @@ internal sealed class SafeServerHandle : SafeHandle
         SetHandle(preexistingHandle);
     }
 
-    public SafeServerHandle(HANDLE preexistingHandle, bool ownsHandle) : this((nint)preexistingHandle, ownsHandle)
-    {
-    }
-
     protected override bool ReleaseHandle()
     {
         PInvoke.WTSCloseServer((HANDLE)handle);
