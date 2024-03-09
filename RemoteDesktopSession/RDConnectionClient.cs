@@ -94,7 +94,7 @@ public class RDConnectionClient
         _clientInfo = clientInfo;
 
         _clientAddress = new Lazy<byte[]>(GetClientAddress);
-        _clientDirectory = new Lazy<string?>(GetClientDirectoryName);
+        _clientDirectory = new Lazy<string?>(GetClientDirectory);
         _clientName = new Lazy<string?>(GetClientName);
         _domainName = new Lazy<string?>(GetDomainName);
         _userName = new Lazy<string?>(GetUserName);
@@ -150,7 +150,7 @@ public class RDConnectionClient
         };
     }
 
-    private unsafe string? GetClientDirectoryName()
+    private unsafe string? GetClientDirectory()
     {
         var clientDirectory = _clientInfo.ClientDirectory;
         return MarshalHelper.PtrToStringOrNull(clientDirectory.Value);
