@@ -59,9 +59,9 @@ public class RDConnectionClient
     public string? UserName => _userName.Value;
 
     /// <summary>
-    /// Gets the security level fo encryption.
+    /// Gets the security level of encryption.
     /// </summary>
-    public int EncryptionLevel => _clientInfo.EncryptionLevel;
+    public EncryptionLevel EncryptionLevel => (EncryptionLevel)_clientInfo.EncryptionLevel;
 
     /// <summary>
     /// Gets the horizontal resolution of the client's display in pixels.
