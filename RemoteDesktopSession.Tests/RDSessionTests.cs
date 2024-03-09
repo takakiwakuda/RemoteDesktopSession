@@ -221,8 +221,8 @@ public class RDSessionTests
         Assert.False((bool)GetPrivateFieldValue(session, "_domainNameGenerated"));
         Assert.False((bool)GetPrivateFieldValue(session, "_userNameGenerated"));
         Assert.False((bool)GetPrivateFieldValue(session, "_idleTimeGenerated"));
+        Assert.False((bool)GetPrivateFieldValue(session, "_sessionNameGenerated"));
         Assert.Equal(0, (long)GetPrivateFieldValue(session, "_idleTime"));
-        Assert.Null(GetPrivateFieldValue(session, "_sessionName"));
         Assert.Null(GetPrivateFieldValue(session, "_sessionInfo"));
         Assert.Null(GetPrivateFieldValue(session, "_clientInfo"));
 

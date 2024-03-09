@@ -137,17 +137,19 @@ public class RDSession : IDisposable
     /// <exception cref="ObjectDisposedException">
     /// The <see cref="RDSession"/> has been disposed.
     /// </exception>
-    public string SessionName
+    public string? SessionName
     {
         get
         {
-            if (_sessionName is null)
+            if (!_sessionNameGenerated)
             {
                 unsafe
                 {
                     var sessionName = SessionInfo.WinStationName;
-                    _sessionName = MarshalHelper.PtrToString(sessionName.Value);
+                    _sessionName = MarshalHelper.PtrToStringOrNull(sessionName.Value);
                 }
+
+                _sessionNameGenerated = true;
             }
 
             return _sessionName;
@@ -231,6 +233,7 @@ public class RDSession : IDisposable
     private string? _userName;
     private long _idleTime;
     private bool _domainNameGenerated;
+    private bool _sessionNameGenerated;
     private bool _userNameGenerated;
     private bool _idleTimeGenerated;
     private bool _disposed;
@@ -454,10 +457,10 @@ public class RDSession : IDisposable
     public void Refresh()
     {
         _domainNameGenerated = false;
+        _sessionNameGenerated = false;
         _userNameGenerated = false;
         _idleTimeGenerated = false;
         _idleTime = 0;
-        _sessionName = null;
         _sessionInfo = null;
         _clientInfo = null;
     }
