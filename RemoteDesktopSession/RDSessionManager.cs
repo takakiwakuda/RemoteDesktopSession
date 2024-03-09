@@ -28,12 +28,12 @@ internal static class RDSessionManager
         }
     }
 
-    internal static unsafe WTSCLIENTW GetClientInfo(SafeServerHandle handle, uint sessionId)
+    internal static WTSCLIENTW GetClientInfo(SafeServerHandle handle, uint sessionId)
     {
         return QuerySessionInfo<WTSCLIENTW>(handle, sessionId, WTS_INFO_CLASS.WTSClientInfo);
     }
 
-    internal static unsafe WTSINFOW GetSessionInfo(SafeServerHandle handle, uint sessionId)
+    internal static WTSINFOW GetSessionInfo(SafeServerHandle handle, uint sessionId)
     {
         return QuerySessionInfo<WTSINFOW>(handle, sessionId, WTS_INFO_CLASS.WTSSessionInfo);
     }
