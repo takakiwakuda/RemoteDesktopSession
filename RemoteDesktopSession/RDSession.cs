@@ -8,6 +8,8 @@ namespace RemoteDesktopSession;
 /// </summary>
 public class RDSession : IDisposable
 {
+    private static readonly string DefaultServerName = Environment.MachineName;
+
     /// <summary>
     /// Gets the <see cref="RDSession"/> that represents the current user.
     /// </summary>
@@ -18,7 +20,7 @@ public class RDSession : IDisposable
             SafeServerHandle handle = SafeServerHandle.Null;
             WTSINFOW sessionInfo = RDSessionManager.GetSessionInfo(handle, PInvoke.WTS_CURRENT_SESSION);
 
-            return new RDSession(handle, sessionInfo, (int)sessionInfo.SessionId, null);
+            return new RDSession(handle, sessionInfo, (int)sessionInfo.SessionId, DefaultServerName);
         }
     }
 
@@ -243,17 +245,6 @@ public class RDSession : IDisposable
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RDSession"/> class
-    /// with the specified session information and the name of the host server.
-    /// </summary>
-    /// <param name="sessionInfo">The session information.</param>
-    /// <param name="serverName">The name of the server.</param>
-    private RDSession(WTSINFOW sessionInfo, string? serverName)
-        : this(null, sessionInfo, (int)sessionInfo.SessionId, serverName)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RDSession"/> class
     /// for the specified session ID, the server handle,
     /// the session information, and the name of the host server.
     /// </summary>
@@ -261,12 +252,12 @@ public class RDSession : IDisposable
     /// <param name="sessionInfo">The session information.</param>
     /// <param name="sessionId">The session ID.</param>
     /// <param name="serverName">The name of the server.</param>
-    private RDSession(SafeServerHandle? handle, WTSINFOW sessionInfo, int sessionId, string? serverName)
+    private RDSession(SafeServerHandle? handle, WTSINFOW sessionInfo, int sessionId, string serverName)
     {
         _handle = handle;
         _sessionInfo = sessionInfo;
         _sessionId = sessionId;
-        _serverName = serverName ?? Environment.MachineName;
+        _serverName = serverName;
     }
 
     /// <summary>
@@ -290,7 +281,7 @@ public class RDSession : IDisposable
         SafeServerHandle handle = SafeServerHandle.Null;
         WTSINFOW sessionInfo = RDSessionManager.GetSessionInfo(handle, (uint)sessionId);
 
-        return new RDSession(handle, sessionInfo, sessionId, Environment.MachineName);
+        return new RDSession(handle, sessionInfo, sessionId, DefaultServerName);
     }
 
     /// <summary>
@@ -344,7 +335,7 @@ public class RDSession : IDisposable
     /// </returns>
     public static RDSession[] GetSessions()
     {
-        return GetSessions(SafeServerHandle.Null, Environment.MachineName);
+        return GetSessions(SafeServerHandle.Null, DefaultServerName);
     }
 
     /// <summary>
@@ -386,10 +377,12 @@ public class RDSession : IDisposable
     {
         WTSINFOW[] sessionInfos = RDSessionManager.GetSessionInfos(handle);
         RDSession[] sessions = new RDSession[sessionInfos.Length];
+        WTSINFOW sessionInfo;
 
         for (int i = 0; i < sessions.Length; i++)
         {
-            sessions[i] = new RDSession(sessionInfos[i], serverName);
+            sessionInfo = sessionInfos[i];
+            sessions[i] = new RDSession(null, sessionInfo, (int)sessionInfo.SessionId, serverName);
         }
 
         return sessions;
