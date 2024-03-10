@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using Windows.Win32.System.RemoteDesktop;
 
 namespace RemoteDesktopSession.Tests;
 
@@ -10,12 +11,6 @@ public class RDSessionTests
     private static RDSession CreateDefaultSession()
     {
         return RDSession.Current;
-    }
-
-    private static int GetCurrentProcessSessionId()
-    {
-        using var process = Process.GetCurrentProcess();
-        return process.SessionId;
     }
 
     [Fact]
@@ -187,6 +182,12 @@ public class RDSessionTests
         Assert.Equal(Environment.MachineName, session.ServerName);
         Assert.Equal(Environment.UserDomainName, session.DomainName);
         Assert.Equal(Environment.UserName, session.UserName);
+
+        static int GetCurrentProcessSessionId()
+        {
+            using var process = Process.GetCurrentProcess();
+            return process.SessionId;
+        }
     }
 
     [Fact]
@@ -196,6 +197,7 @@ public class RDSessionTests
         using var sessionToTest = RDSession.GetSessionById(session.SessionId);
 
         Assert.Equal(session.SessionId, sessionToTest.SessionId);
+        Assert.Equal(session.SessionName, sessionToTest.SessionName);
         Assert.Equal(session.ServerName, sessionToTest.ServerName);
         Assert.Equal(session.DomainName, sessionToTest.DomainName);
         Assert.Equal(session.UserName, sessionToTest.UserName);
@@ -204,9 +206,23 @@ public class RDSessionTests
     [Fact]
     public void TestGetSessions()
     {
-        var sessions = RDSession.GetSessions();
+        using var session = CreateDefaultSession();
+        bool sessionExists = false;
 
-        Assert.NotNull(sessions);
+        foreach (var sessionToTest in RDSession.GetSessions())
+        {
+            if (sessionToTest.SessionName == session.SessionName)
+            {
+                Assert.Equal(session.SessionId, sessionToTest.SessionId);
+                Assert.Equal(session.ServerName, sessionToTest.ServerName);
+                Assert.Equal(session.DomainName, sessionToTest.DomainName);
+                Assert.Equal(session.UserName, sessionToTest.UserName);
+
+                sessionExists = true;
+            }
+        }
+
+        Assert.True(sessionExists);
     }
 
     [Fact]
@@ -218,24 +234,22 @@ public class RDSessionTests
 
         session.Refresh();
 
+        Assert.False((bool)GetPrivateFieldValue(session, "_sessionNameGenerated"));
         Assert.False((bool)GetPrivateFieldValue(session, "_domainNameGenerated"));
         Assert.False((bool)GetPrivateFieldValue(session, "_userNameGenerated"));
         Assert.False((bool)GetPrivateFieldValue(session, "_idleTimeGenerated"));
-        Assert.False((bool)GetPrivateFieldValue(session, "_sessionNameGenerated"));
         Assert.Equal(0, (long)GetPrivateFieldValue(session, "_idleTime"));
         Assert.Null(GetPrivateFieldValue(session, "_sessionInfo"));
         Assert.Null(GetPrivateFieldValue(session, "_clientInfo"));
 
         static void GenerateFieldValue(RDSession session)
         {
-            _ = session.DomainName;
-            _ = session.UserName;
-            _ = session.IdleTime;
-            _ = session.SessionName;
-            _ = session.Client;
-
-            // Force non-zero value
+            SetPrivateFieldValue(session, "_sessionNameGenerated", true);
+            SetPrivateFieldValue(session, "_domainNameGenerated", true);
+            SetPrivateFieldValue(session, "_userNameGenerated", true);
+            SetPrivateFieldValue(session, "_idleTimeGenerated", true);
             SetPrivateFieldValue(session, "_idleTime", 1);
+            SetPrivateFieldValue(session, "_clientInfo", new WTSCLIENTW());
         }
 
         static object GetPrivateFieldValue(RDSession session, string name)

@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.Windows.SDK.Win32Metadata" Version="59.0.13-preview" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
 </Project>
